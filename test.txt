@@ -1,0 +1,8 @@
+pip3 install fastapi[all]
+pip3 install sqlalchemy
+sudo apt install libpq-dev python3.11-dev
+pip3 install psycopg2
+
+
+
+docker exec -it feec3dc1f494 /bin/sh
