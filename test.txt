@@ -6,3 +6,46 @@ pip3 install psycopg2
 
 
 docker exec -it feec3dc1f494 /bin/sh
+
+
+##################Demo Request#####################
+
+{
+	"context": {
+		"domain": "nic2004:52110",
+		"action": "search",
+		"country": "IND",
+		"city": "std:080",
+		"core_version": "1.0.0",
+		"bap_id": "ondc.paytm.com",
+		"bap_uri": "https://ondc-staging.paytm.com/retail",
+		"transaction_id": "3df395a9-c196-4678-a4d1-5eaf4f7df8dc",
+		"message_id": "1655281254861",
+		"timestamp": "2022-06-15T08:20:54.861Z",
+		"ttl": "PT30S"
+	},
+	"message": {
+		"intent": {
+			"item": {
+				"descriptor": {
+					"name": "Bag"
+				}
+			},
+			"fulfillment": {
+				"type": "Delivery",
+				"end": {
+					"location": {
+						"gps": "12.974002,77.613458",
+						"address": {
+							"area_code": "382421"
+						}
+					}
+				}
+			},
+			"payment": {
+				"@ondc/org/buyer_app_finder_fee_type": "percent",
+				"@ondc/org/buyer_app_finder_fee_amount": "3"
+			}
+		}
+	}
+}
