@@ -1,8 +1,10 @@
 from datetime import datetime
 from enum import Enum
 from typing import Any, List, Optional
+
+from pydantic import AnyUrl, BaseModel, Field, RootModel
+
 from .actions import Action
-from pydantic import AnyUrl, BaseModel, RootModel, Field
 
 
 class Status(Enum):

@@ -8,7 +8,7 @@ def add_ondc_request(db_session, domain, action, message_id, request):
         domain=domain,
         message_id=message_id,
         request=request,
-        created_at=get_current_time_utc()
+        created_at=get_current_time_utc(),
     )
     db_session.add(ondc_request)
     db_session.commit()

@@ -1,5 +1,6 @@
+from sqlalchemy import JSON, Column, DateTime, Enum, Integer, String
+
 from app.database import Base
-from sqlalchemy import Column, Integer, String, DateTime, Enum, JSON
 from app.schemas.actions import Action, Domain
 
 

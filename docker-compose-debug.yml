@@ -2,8 +2,30 @@ version: '3'
 
 services:
 
-  protocol-db:
-    container_name: protocol-db
+  protocol-network-rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: protocol-network-rabbitmq
+    volumes:
+      - protocol_rabbitmq_data:/var/lib/rabbitmq/
+      - protocol_rabbitmq_log:/var/log/rabbitmq/
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    env_file:
+      - .env
+    networks:
+      - seller-api-network
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 30s
+      retries: 5
+
+  protocol-network-db:
+    container_name: protocol-network-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -13,7 +35,7 @@ services:
       context: ./database
       dockerfile: Dockerfile
     networks:
-      - ondc-api-network
+      - seller-api-network
     volumes:
       - protocol_network_data:/var/lib/postgresql/data
     ports:
@@ -30,26 +52,56 @@ services:
   protocol-network-api:
     build:
       context: .
-      dockerfile: ./app/Dockerfile    
+      dockerfile: ./app/Dockerfile
     container_name: protocol-network-api
     depends_on:
-      - protocol-db
+      protocol-network-db:
+        condition: service_healthy
+      protocol-network-rabbitmq:
+        condition: service_healthy
     environment:
-      - POSTGRES_HOST=protocol-db
+      - POSTGRES_HOST=protocol-network-db
+      - RABBITMQ_HOST=protocol-network-rabbitmq
     networks:
-      - ondc-api-network
+      - seller-api-network
     env_file:
-      - .env
+        - .env
     command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"]
     volumes:
       - .:/app
     ports:
       - "8000:8000"
       - "5678:5678"
+    healthcheck:
+      test: curl --fail http://localhost:8000 || exit 1
+      interval: 10s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
 
+  protocol-network-queue:
+    container_name: protocol-network-queue
+    build:
+      context: .
+      dockerfile: ./worker_queue/Dockerfile
+    networks:
+      - seller-api-network
+    depends_on:
+      protocol-network-rabbitmq:
+        condition: service_healthy
+    environment:
+      - POSTGRES_HOST=protocol-network-db
+      - RABBITMQ_HOST=protocol-network-rabbitmq
+    restart: on-failure
+    volumes:
+      - .:/worker_queue
+    env_file:
+      - .env
+    command: ["sh","-c", "PYTHONPATH=. python ./worker_queue/main.py"]
 networks:
-  ondc-api-network:
+  seller-api-network:
     driver: bridge
 volumes:
   protocol_network_data:
-
+  protocol_rabbitmq_data:
+  protocol_rabbitmq_log:
