@@ -1,19 +1,25 @@
-# Pull base image
-FROM python:3.11 as builder
+# temp stage
+FROM python:3.11-slim as builder
 
-# Set environment variables
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc && apt install -y python3-dev libpq-dev
+
 COPY ./app/requirements.txt requirements.txt
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
 
-# Install pipenv
-RUN set -ex && pip install --upgrade pip
 
-# Install dependencies
-RUN set -ex && pip install -r requirements.txt
-
+# final stage
 FROM builder as final
+
 WORKDIR /app
 COPY ./app/ /app/
 COPY .env /app/
+COPY --from=builder /app/wheels /wheels
+COPY --from=builder /app/requirements.txt .
 
-RUN set -ex && bash -c "eval $(grep 'PYTHONDONTWRITEBYTECODE' .env)"
-RUN set -ex && bash -c "eval $(grep 'PYTHONUNBUFFERED' .env)"
+RUN pip install --no-cache /wheels/*
