@@ -4,7 +4,7 @@ WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'ondc_connect_devdb')\
 CREATE SCHEMA ondc_connect;
 
 
-CREATE TABLE IF NOT EXISTS ondc_request (
+CREATE TABLE IF NOT EXISTS ondc_connect.ondc_request (
     id SERIAL PRIMARY KEY,
     action VARCHAR(255),
     domain VARCHAR(255),

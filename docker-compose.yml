@@ -26,11 +26,12 @@ services:
 
   protocol-network-db:
     container_name: protocol-network-db
-    command: "postgres -c config_file=./database/config/postgresql.conf"
+    command: "postgres -c config_file=/database/config/postgresql.conf"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       PGDATA: ${PGDATA}
+      POSTGRES_INITDB_ARGS: ${POSTGRES_INITDB_ARGS}
     env_file:
       - .env
     build:
@@ -51,6 +52,13 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  adminer:
+    image: adminer
+    restart: always
+    networks:
+      - seller-api-network
+    ports:
+      - 8080:8080
 
   protocol-network-api:
     build:

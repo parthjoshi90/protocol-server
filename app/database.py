@@ -27,6 +27,7 @@ def get_session() -> Generator[scoped_session, None, None]:
 
 
 Base: Any = declarative_base()
+Base.metadata.schema = "ondc_connect"
 
 
 def sqlalchemy_to_dict(obj):

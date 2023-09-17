@@ -26,7 +26,7 @@ services:
 
   protocol-network-db:
     container_name: protocol-network-db
-    command: "postgres -c config_file=./database/config/postgresql.conf"
+    command: "postgres -c config_file=/config/postgresql.conf"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
